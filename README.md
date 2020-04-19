@@ -8,3 +8,4 @@
 * [RabbitMQ](./RabbitMQ.md)
 * [MongoDB](./MongoDB.md)
 * [GFS](./GFS.md)
+* [Consul](./Consul.md)

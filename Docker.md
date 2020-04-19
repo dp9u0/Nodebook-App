@@ -16,13 +16,14 @@
 * docker pull
 * docker image ls
 * docker image rm
-* (__慎用__)docker commit : `docker commit [选项] <容器ID或容器名> [<仓库名>[:<标签>]]` 
+* (__慎用__)docker commit : `docker commit [选项] <容器ID或容器名> [<仓库名>[:<标签>]]`
 * docker diff <容器ID或容器名>
 * `docker history <镜像ID或[<仓库名>[:<标签>]]>`
 
 ### Dockerfile
 
 docker build [选项] <上下文路径/URL/->
+
 * `docker build -t nginx:v3 .` : 上下文路径指定 COPY 等命令执行时 的源路径
 * `docker build https://github.com/twang2218/gitlab-ce-zh.git#:111`
 * `cat Dockerfile | docker build -`
@@ -41,6 +42,7 @@ Dockerfile 中每一个指令都会建立一个新的层
 * EXPOSE ：暴露容器端口 ,不同的是 参数 -p 功能是端口映射
 * USER : 指定用户/用户组
 * ONBUILD : 基础镜像不执行,后续镜像
+
 ```shell
 ONBUILD COPY ./package.json /app
 ONBUILD RUN [ "npm", "install" ]
@@ -103,7 +105,7 @@ COPY --from=laravel ${LARAVEL_PATH}/public ${LARAVEL_PATH}/public
 * docker run -i -t : 交互 分配伪终端并绑定到容器STD IN/OUT
 * docker run -d : 后台运行
 * docker container start/stop
-* docker exec -it xxx bash : 进入容器并执行命令 这时候输入 exit 不会终止容器 但是 docker attach 会导致容器停止 
+* docker exec -it xxx bash : 进入容器并执行命令 这时候输入 exit 不会终止容器 但是 docker attach 会导致容器停止
 * docker container rm / prune : 删除/清理容器
 
 ## 仓库
@@ -114,7 +116,7 @@ COPY --from=laravel ${LARAVEL_PATH}/public ${LARAVEL_PATH}/public
 
 ### Docker Hub Automated Builds
 
-### 私有仓库 
+### 私有仓库
 
 * docker-registry
 * Nexus
@@ -123,7 +125,7 @@ COPY --from=laravel ${LARAVEL_PATH}/public ${LARAVEL_PATH}/public
 
 类似于mount,将本地文件系统挂在到容器中,用于持久化数据等功能
 
-* 数据卷 
+* 数据卷
   * 创建 `docker volume create my-vol`
   * 挂载 `docker run -d -P --name web --mount source=my-vol,target=/webapp`
   * or `docker run -d -P --name web -v my-vol:/wepapp`
