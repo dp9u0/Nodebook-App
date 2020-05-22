@@ -68,10 +68,10 @@
 ![write](GFS/write.png)
 
 ```shell
-1. client 询问 master 持有租约的chunk
-2. master 返回 chunk标识符 及其副本, client 缓存这些信息 以便之后使用,直到信息过期或者主Chunk表示其已经不再持有租约
+1. client 询问 master chunk
+2. master 返回 chunk标识符及其副本, client 缓存这些信息 以便之后使用,直到信息过期或者主Chunk表示其已经不再持有租约
 3. client 向所有的 chunk server 推送数据操作
-4. client 推送完成后,告知 主 Chunk 开始写入,主 Chunk 为所有操作生成连续序号(可能来自不同的 client,序号保证了操作的顺序执行),按照需要顺序执行操作并更新状态
+4. client 推送完成后,告知主 Chunk 开始写入,主 Chunk 所在服务器为所有操作生成连续序号(可能来自不同的 client,序号保证了操作的顺序执行),按照需要顺序执行操作并更新状态
 5. 主 Chunk 将写请求传递到二级副本并提供序号，二级副本按照序号顺序执行操作
 6. 回复主Chunk 写入完成
 7. 主 Chunk 告知 Client 写入结果
@@ -91,6 +91,49 @@
 * 追加结果可能失败,Client 重新发起追加 例如 A B C三个副本 第一次追加 data B 失败了,会再次追加一次,虽然 部分（第一部分）不一致,但是成功部分（第二部分）是define的,Client 获取到的offset 也是一样的
   1. A : data ,B : * , C : data
   2. A : data data ,B : * data, C : data data
+
+### 快照
+
+Copy On Write 实现快照
+
+1. 取消文件租约
+2. 快照文件与源文件指向相同的Chunk
+3. Client 写入 Chunk 时,由于租约过期,首先访问Master,Master 发现 这个Chunk 被引用两次（源和快照）Master 命令所有Chunk Server 创建 新的Chunck
+4. Master 为这个新的Chunk 创建租约
+5. Client 写 新的Chunk
+
+## Master操作
+
+### 命名空间管理和锁
+
+命名空间并不是完整的文件目录,仅仅是查找表,通过前缀压缩,形成树状结构
+
+### 副本位置
+
+* 最大化数据可靠性
+* 最大化网络带宽利用率
+
+### Chunk 创建 复制 负载均衡
+
+创建策略:
+
+* 最低硬盘使用率
+* 最低负载
+* 尽可能分布在多个机架
+
+复制策略:
+
+当一个Chunk **有效** 副本数量小于用户指定的复制因数时,Master 节点会复制它
+
+负载均衡: 周期性的对副本调整
+
+### GC
+
+惰性垃圾回收
+
+### 过期副本
+
+版本号
 
 ## Reference
 
