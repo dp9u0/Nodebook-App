@@ -2,40 +2,68 @@
 
 ## run consul on docker
 
-```shell
-docker pull consul:1.7
-```
+启动两组集群
 
-```shell
-# run server 1
-docker run -d -p 8510:8500 --restart=always -v /var/consul/data/server1:/consul/data -v /var/consul/conf/server1:/consul/config -e CONSUL_BIND_INTERFACE='eth0' --privileged=true --name=consul_server_1 consul:1.7 agent -server -bootstrap-expect=3 -ui -node=consul_server_1 -client='0.0.0.0' -data-dir /consul/data -config-dir /consul/config -datacenter=xdp_dc;
-```
+```yml
+version: "3.6"
 
-```shell
-JOIN_IP="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' consul_server_1)";
-```
+services:
+  consul_server_1:
+    image: consul:1.7
+    container_name: consul_server_1
+    restart: always
+    network_mode: "host"
+    command: agent -server -client=0.0.0.0 -bootstrap-expect=3 -node=consul_server_1 -datacenter=dc_001 -data-dir /consul/data -config-dir /consul/config
+  consul2:
+  
+    image: consul:1.7
+    container_name: consul_server_2
+    networks:
+      - consul
+    restart: always
+    command: agent -server -client=0.0.0.0 -retry-join=consul_server_1 -node=consul_server_2 -datacenter=dc_001 -data-dir /consul/data -config-dir /consul/config
+  consul3:
+    image: consul:1.7
+    container_name: consul_server_3
+    network_mode: "host"
+    restart: always
+    command: agent -server -client=0.0.0.0 -retry-join=consul_server_1 -node=consul_server_3 -datacenter=dc_001 -data-dir /consul/data -config-dir /consul/config
+  consul4:
+    image: consul:1.7
+    container_name: consul_client_1
+    network_mode: "host"
+    restart: always
+    ports:
+      - 18500:8500
+    command: agent -client=0.0.0.0 -retry-join=consul_server_1 -ui -node=consul_client_1 -datacenter=dc_001 -data-dir /consul/data -config-dir /consul/config
+  consul5:
+    image: consul:1.7
+    container_name: consul_server_5
+    network_mode: "host"
+    restart: always
+    command: agent -server -client=0.0.0.0 -bootstrap-expect=3 -node=consul_server_5 -datacenter=dc_002 -data-dir /consul/data -config-dir /consul/config
+  consul6:
+    image: consul:1.7
+    container_name: consul_server_6
+    network_mode: "host"
+    restart: always
+    command: agent -server -client=0.0.0.0 -retry-join=consul_server_5 -node=consul_server_6 -datacenter=dc_002 -data-dir /consul/data -config-dir /consul/config
+  consul7:
+    image: consul:1.7
+    container_name: consul_server_7
+    network_mode: "host"
+    restart: always
+    command: agent -server -client=0.0.0.0 -retry-join=consul_server_5 -node=consul_server_7 -datacenter=dc_002 -config-dir /consul/config
+  consul8:
+    image: consul:1.7
+    container_name: consul_client_2
+    network_mode: "host"
+    restart: always
+    ports:
+      - 28500:8500
+    command: agent -client=0.0.0.0 -retry-join=consul_server_5 -ui -node=consul_client_2 -datacenter=dc_002 -config-dir /consul/config
 
-```shell
-# run server 2
-docker run -d -p 8520:8500 --restart=always -v /var/consul/data/server2:/consul/data -v /var/consul/conf/server2:/consul/config -e CONSUL_BIND_INTERFACE='eth0' --privileged=true --name=consul_server_2 consul:1.7 agent -server -ui -node=consul_server_2 -client='0.0.0.0' -datacenter=xdp_dc -data-dir /consul/data -config-dir /consul/config -join=$JOIN_IP;　　
-```
-
-```shell
-# run server 3
-docker run -d -p 8530:8500 --restart=always -v /var/consul/data/server3:/consul/data -v /var/consul/conf/server3:/consul/config -e CONSUL_BIND_INTERFACE='eth0' --privileged=true --name=consul_server_3 consul:1.7 agent -server -ui -node=consul_server_3 -client='0.0.0.0' -datacenter=xdp_dc -data-dir /consul/data -config-dir /consul/config -join=$JOIN_IP;
-```
-
-```shell
-# run server 4
-docker run -d -p 8540:8500 --restart=always -v /var/consul/data/server4:/consul/data -v /var/consul/conf/server4:/consul/config -e CONSUL_BIND_INTERFACE='eth0' --privileged=true --name=consul_server_4 consul:1.7 agent -server -ui -node=consul_server_4 -client='0.0.0.0' -datacenter=xdp_dc -data-dir /consul/data -config-dir /consul/config -join=$JOIN_IP;
-```
-
-```shell
-# run client 1
-docker run -d -p 18510:8500 --restart=always -v /var/consul/conf/client1:/consul/config -e CONSUL_BIND_INTERFACE='eth0' --name=consul_client_1 consul:1.7 agent -node=consul_client_1 -join=$JOIN_IP -client='0.0.0.0' -datacenter=xdp_dc -config-dir /consul/config
-```
-
-```shell
-# run client 2
-docker run -d -p 18520:8500 --restart=always -v /var/consul/conf/client2:/consul/config -e CONSUL_BIND_INTERFACE='eth0' --name=consul_client_2 consul:1.7 agent -node=consul_client_2 -join=$JOIN_IP -client='0.0.0.0' -datacenter=xdp_dc -config-dir /consul/config
+networks:
+  consul:
+    driver: bridge
 ```

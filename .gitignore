@@ -57,3 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
+Consul/obj
+Consul/bin
+Consul/*.user
+Consul/.vs
+
