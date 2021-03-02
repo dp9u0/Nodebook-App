@@ -54,7 +54,7 @@ namespace ConsulSample
 
 
     /// <summary>
-    /// ȡ��������ip
+    /// GET Local IP
     /// </summary>
     /// <returns></returns>
     private static string GetLocalIP()
@@ -62,13 +62,10 @@ namespace ConsulSample
       try
       {
 
-        string HostName = Dns.GetHostName(); //�õ�������
+        string HostName = Dns.GetHostName();
         IPHostEntry IpEntry = Dns.GetHostEntry(HostName);
         for (int i = 0; i < IpEntry.AddressList.Length; i++)
         {
-          //��IP��ַ�б���ɸѡ��IPv4���͵�IP��ַ
-          //AddressFamily.InterNetwork��ʾ��IPΪIPv4,
-          //AddressFamily.InterNetworkV6��ʾ�˵�ַΪIPv6����
           if (IpEntry.AddressList[i].AddressFamily == AddressFamily.InterNetwork)
           {
             string ip = "";
